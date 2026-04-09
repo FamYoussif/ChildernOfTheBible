@@ -8,4 +8,12 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\Users\LOQ\source\repos\ChildernOfTheBible\ChildernOfTheBible\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="C:\Users\LOQ\source\repos\ChildernOfTheBible\ChildernOfTheBible\.editorconfig" />
+  </ItemGroup>
+
 </Project>
