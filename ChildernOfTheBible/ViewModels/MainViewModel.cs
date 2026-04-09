@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ChildernOfTheBible.ViewModels
 {
-    internal class MainViewModel
+    public class MainViewModel
     {
     }
 }
