@@ -17,7 +17,7 @@ namespace ChildernOfTheBible.Views
     /// <summary>
     /// Interaction logic for AttendanceView.xaml
     /// </summary>
-    public partial class AttendanceView : Window
+    public partial class AttendanceView : UserControl
     {
         public AttendanceView()
         {

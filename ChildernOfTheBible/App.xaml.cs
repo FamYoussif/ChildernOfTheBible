@@ -33,10 +33,14 @@ namespace ChildernOfTheBible
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
             ServiceProvider = serviceCollection.BuildServiceProvider();
+            using (var scope = ServiceProvider.CreateScope())
+            {
+                // 4. Resolve MainViewModel and MainWindow
+                var mainWindow = scope.ServiceProvider.GetRequiredService<MainWindow>();
 
-            // Show main window
-            var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
-            mainWindow.Show();
+                // 5. Link them and Show
+                mainWindow.Show();
+            }
         }
 
         private void ConfigureServices(IServiceCollection services)

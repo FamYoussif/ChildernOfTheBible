@@ -17,7 +17,7 @@ namespace ChildernOfTheBible.Views
     /// <summary>
     /// Interaction logic for UserManagement.xaml
     /// </summary>
-    public partial class UserManagement : Window
+    public partial class UserManagement : UserControl
     {
         public UserManagement()
         {

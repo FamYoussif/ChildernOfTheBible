@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ChildernOfTheBible.ViewModels
 {
-    internal class UserManagementViewModel
+    public partial class UserManagementViewModel : ObservableObject
     {
+        [ObservableProperty]
+        private string _title = "Member Management";
     }
 }
