@@ -17,7 +17,7 @@ namespace ChildernOfTheBible.Views
     /// <summary>
     /// Interaction logic for ReportingView.xaml
     /// </summary>
-    public partial class ReportingView : Window
+    public partial class ReportingView : UserControl
     {
         public ReportingView()
         {

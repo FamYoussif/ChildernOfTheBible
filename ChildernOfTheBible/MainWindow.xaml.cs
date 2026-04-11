@@ -20,7 +20,7 @@ namespace ChildernOfTheBible
         public MainWindow(MainViewModel viewModel)
         {
             InitializeComponent();
-            DataContext = viewModel; 
+            DataContext = viewModel;
         }
     }
 }

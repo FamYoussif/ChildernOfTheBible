@@ -1,12 +1,15 @@
-﻿<Window x:Class="ChildernOfTheBible.Views.ReportingView"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ChildernOfTheBible.Views"
-        mc:Ignorable="d"
-        Title="ReportingView" Height="450" Width="800">
-    <Grid>
-        
+﻿<UserControl x:Class="ChildernOfTheBible.Views.ReportingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:ChildernOfTheBible.Views"
+             mc:Ignorable="d"
+             Height="450" Width="800">
+    <Grid Background="White">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock Text="{Binding Title}" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+            <TextBlock Text="Reporting tools and export options will go here." FontSize="16" Foreground="Gray"/>
+        </StackPanel>
     </Grid>
-</Window>
+</UserControl>

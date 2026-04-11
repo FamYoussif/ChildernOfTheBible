@@ -4,9 +4,54 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ChildernOfTheBible"
+        xmlns:vm="clr-namespace:ChildernOfTheBible.ViewModels"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Bible Study Attendance System" Height="600" Width="1000"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F5F5">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
+        <!-- Sidebar Navigation -->
+        <Grid Grid.Column="0" Background="#1E1E2D">
+            <StackPanel Margin="0,20,0,0">
+                <TextBlock Text="⛪ BIBLE STUDY" Foreground="White" FontSize="18" FontWeight="Bold" 
+                           HorizontalAlignment="Center" Margin="0,0,0,30"/>
+
+                <Button Command="{Binding NavigateToAttendanceCommand}" 
+                        Style="{StaticResource NavButtonStyle}" Content="📷 Attendance"/>
+                <Button Command="{Binding NavigateToMembersCommand}" 
+                        Style="{StaticResource NavButtonStyle}" Content="👥 Members"/>
+                <Button Command="{Binding NavigateToReportsCommand}" 
+                        Style="{StaticResource NavButtonStyle}" Content="📊 Reports"/>
+            </StackPanel>
+
+            <TextBlock Text="DB: Connected" Foreground="#5DCAA5" FontSize="12" 
+                       VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="15,0,0,15"/>
+        </Grid>
+
+        <!-- Main Content Area -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Top Header -->
+            <Border Grid.Row="0" Background="White" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+                <Grid Margin="20,0">
+                    <TextBlock Text="Church Attendance System" VerticalAlignment="Center" FontSize="16" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding Source={x:Static System:DateTime.Now}, StringFormat='{}{0:dddd, MMMM dd, yyyy}'}" 
+                               xmlns:System="clr-namespace:System;assembly=mscorlib"
+                               VerticalAlignment="Center" HorizontalAlignment="Right" Foreground="Gray"/>
+                </Grid>
+            </Border>
+
+            <!-- Dynamic Content -->
+            <ContentControl Grid.Row="1" Content="{Binding CurrentViewModel}" Margin="20"/>
+        </Grid>
     </Grid>
 </Window>
