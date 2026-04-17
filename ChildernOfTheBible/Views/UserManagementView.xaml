@@ -1,52 +1,119 @@
 ﻿<UserControl x:Class="ChildernOfTheBible.Views.UserManagement"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Grid Margin="10">
+    <Grid Margin="20">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="220"/>
         </Grid.ColumnDefinitions>
 
-        <!-- LEFT: member list -->
-        <DockPanel Grid.Column="0" Margin="0,0,10,0">
-            <TextBlock DockPanel.Dock="Top" Text="{Binding Title}" FontSize="20" FontWeight="Bold" Margin="0,0,0,8"/>
-            <TextBox DockPanel.Dock="Top" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
-               Margin="0,0,0,6" Padding="4" Tag="Search members..."/>
-            <Button DockPanel.Dock="Top" Content="Refresh" Command="{Binding LoadMembersCommand}" Margin="0,0,0,6"/>
-            <DataGrid ItemsSource="{Binding Members}" SelectedItem="{Binding SelectedMember}"
-                AutoGenerateColumns="False" IsReadOnly="True"
-                SelectionChanged="DataGrid_SelectionChanged">
+        <!-- Left: member list -->
+        <Grid Grid.Column="0" Margin="0,0,16,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Margin="0,0,0,14">
+                <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="SemiBold"
+                           Foreground="#2C2C2A"/>
+                <TextBlock Text="Add, edit and deactivate member records"
+                           FontSize="12" Foreground="#888780" Margin="0,3,0,0"/>
+            </StackPanel>
+
+            <Grid Grid.Row="1" Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" Margin="0,0,8,0"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                         Padding="10,8"/>
+                <Button Grid.Column="1" Content="Refresh"
+                        Command="{Binding LoadMembersCommand}"
+                        Style="{StaticResource GhostButtonStyle}"/>
+            </Grid>
+
+            <DataGrid Grid.Row="2"
+                      ItemsSource="{Binding Members}"
+                      SelectedItem="{Binding SelectedMember}"
+                      AutoGenerateColumns="False" IsReadOnly="True"
+                      SelectionChanged="DataGrid_SelectionChanged">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="First" Binding="{Binding FirstName}" Width="*"/>
-                    <DataGridTextColumn Header="Last"  Binding="{Binding LastName}"  Width="*"/>
-                    <DataGridTextColumn Header="Barcode" Binding="{Binding BarcodeId}" Width="1.2*"/>
-                    <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive}" Width="60"/>
+                    <DataGridTextColumn Header="First name" Binding="{Binding FirstName}" Width="*"/>
+                    <DataGridTextColumn Header="Last name"  Binding="{Binding LastName}"  Width="*"/>
+                    <DataGridTextColumn Header="Barcode ID" Binding="{Binding BarcodeId}" Width="1.3*"/>
+                    <DataGridCheckBoxColumn Header="Active"  Binding="{Binding IsActive}"  Width="60"/>
                 </DataGrid.Columns>
             </DataGrid>
-        </DockPanel>
+        </Grid>
 
-        <!-- RIGHT: form + barcode -->
-        <StackPanel Grid.Column="1" Margin="10,0,0,0">
-            <TextBlock Text="Member Details" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8"/>
-            <TextBox Text="{Binding FirstName}" Margin="0,0,0,4" Padding="4"
-               Tag="First Name"/>
-            <TextBox Text="{Binding LastName}"  Margin="0,0,0,4" Padding="4"
-               Tag="Last Name"/>
-            <TextBox Text="{Binding Email}"     Margin="0,0,0,4" Padding="4"
-               Tag="Email (stored encrypted)"/>
-            <TextBox Text="{Binding Phone}"     Margin="0,0,0,12" Padding="4"
-               Tag="Phone (stored encrypted)"/>
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                <Button Content="Add New" Command="{Binding AddMemberCommand}" Margin="0,0,8,0" Padding="12,6"/>
-                <Button Content="Save Edit" Command="{Binding SaveEditCommand}"  Margin="0,0,8,0" Padding="12,6"/>
-                <Button Content="Deactivate" Command="{Binding DeactivateCommand}" Padding="12,6" Background="#FFDDDD"/>
-            </StackPanel>
-            <TextBlock Text="{Binding StatusMessage}" Foreground="#2563EB" TextWrapping="Wrap" Margin="0,0,0,12"/>
-            <TextBlock Text="Member Barcode" FontWeight="SemiBold" Margin="0,0,0,4"/>
-            <Image x:Name="BarcodeImg"
-                   Source="{Binding BarcodeImage}" Height="80" HorizontalAlignment="Left"
-                   Stretch="Uniform" Margin="0,0,0,8"/>
-            <Button Content="Print Barcode" Click="PrintBarcode_Click" Padding="12,6"/>
-        </StackPanel>
+        <!-- Right: form -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" CornerRadius="10" Background="White"
+                    BorderBrush="#E8E7E0" BorderThickness="0.5" Padding="16">
+                <StackPanel>
+                    <TextBlock Text="Member details" FontSize="13" FontWeight="SemiBold"
+                               Foreground="#2C2C2A" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="First name" FontSize="11" Foreground="#888780" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding FirstName}" Margin="0,0,0,10"/>
+
+                    <TextBlock Text="Last name" FontSize="11" Foreground="#888780" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding LastName}" Margin="0,0,0,10"/>
+
+                    <TextBlock Text="Email (encrypted)" FontSize="11" Foreground="#888780" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding Email}" Margin="0,0,0,10"/>
+
+                    <TextBlock Text="Phone (encrypted)" FontSize="11" Foreground="#888780" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding Phone}" Margin="0,0,0,14"/>
+
+                    <!-- Action buttons -->
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="Add new"
+                                Command="{Binding AddMemberCommand}"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Margin="0,0,4,0"/>
+                        <Button Grid.Column="1" Content="Save edit"
+                                Command="{Binding SaveEditCommand}"
+                                Style="{StaticResource GhostButtonStyle}"
+                                Margin="4,0,0,0"/>
+                    </Grid>
+                    <Button Content="Deactivate member"
+                            Command="{Binding DeactivateCommand}"
+                            Style="{StaticResource DangerButtonStyle}"
+                            HorizontalAlignment="Stretch" Margin="0,0,0,10"/>
+
+                    <TextBlock Text="{Binding StatusMessage}"
+                               Foreground="#185FA5" FontSize="11"
+                               TextWrapping="Wrap" Margin="0,0,0,12"/>
+
+                    <!-- Barcode -->
+                    <TextBlock Text="Member barcode" FontSize="11" FontWeight="SemiBold"
+                               Foreground="#2C2C2A" Margin="0,0,0,8"/>
+                    <Border CornerRadius="7" Background="#F7F6F2"
+                            BorderBrush="#E8E7E0" BorderThickness="0.5"
+                            Height="64" Margin="0,0,0,8">
+                        <Image x:Name="BarcodeImg"
+                               Source="{Binding BarcodeImage}"
+                               Stretch="Uniform" Margin="8"/>
+                    </Border>
+                    <Button Content="Print barcode"
+                            Click="PrintBarcode_Click"
+                            Style="{StaticResource GhostButtonStyle}"
+                            HorizontalAlignment="Stretch"/>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>
