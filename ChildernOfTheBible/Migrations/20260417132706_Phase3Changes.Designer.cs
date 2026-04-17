@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChildernOfTheBible.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260409115000_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260417132706_Phase3Changes")]
+    partial class Phase3Changes
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

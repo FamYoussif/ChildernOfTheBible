@@ -45,27 +45,34 @@ namespace ChildernOfTheBible
 
         private void ConfigureServices(IServiceCollection services)
         {
-            // Register DbContext with connection string from appsettings.json
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddSingleton<IConfiguration>(Configuration);
+
+            // ✅ CHANGED: AddDbContextFactory instead of AddDbContext
+            // This allows services to create fresh contexts on demand
+            // rather than sharing one scoped instance that gets disposed
+            services.AddDbContextFactory<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            // Register Services
-            services.AddTransient<DatabaseService>();
+            // Core Services
+            services.AddSingleton<EncryptionService>();
+            services.AddTransient<MemberService>();
             services.AddTransient<BarcodeService>();
+            services.AddTransient<AttendanceService>();
             services.AddTransient<ReportService>();
 
-            // Register WPF viewmodels
+            // ViewModels
             services.AddTransient<MainViewModel>();
             services.AddTransient<UserManagementViewModel>();
             services.AddTransient<AttendanceViewModel>();
             services.AddTransient<ReportingViewModel>();
 
-            // Register WPF windows views
+            // Views
             services.AddTransient<MainWindow>();
             services.AddTransient<UserManagement>();
             services.AddTransient<AttendanceView>();
             services.AddTransient<ReportingView>();
         }
+
 
     }
 

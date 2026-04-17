@@ -1,27 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using ChildernOfTheBible.ViewModels;
 
 namespace ChildernOfTheBible.Views
 {
-    /// <summary>
-    /// Interaction logic for UserManagement.xaml
-    /// </summary>
     public partial class UserManagement : UserControl
     {
         public UserManagement()
         {
             InitializeComponent();
+
+            // Auto-load members when the view appears
+            Loaded += async (s, e) =>
+            {
+                if (DataContext is UserManagementViewModel vm)
+                    await vm.LoadMembersCommand.ExecuteAsync(null);
+            };
+        }
+
+        private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DataContext is UserManagementViewModel vm && vm.SelectedMember != null)
+                vm.SelectMemberCommand.Execute(vm.SelectedMember);
+        }
+
+        private void PrintBarcode_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new PrintDialog();
+            if (dlg.ShowDialog() == true)
+                dlg.PrintVisual(BarcodeImg, "Member Barcode");
         }
     }
 }

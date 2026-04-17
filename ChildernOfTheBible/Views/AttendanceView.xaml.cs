@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using ChildernOfTheBible.ViewModels;
 
 namespace ChildernOfTheBible.Views
 {
@@ -22,6 +23,12 @@ namespace ChildernOfTheBible.Views
         public AttendanceView()
         {
             InitializeComponent();
+        }
+        // Views/AttendanceView.xaml.cs — add inside class
+        private void BarcodeBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && DataContext is AttendanceViewModel vm)
+                vm.ProcessBarcodeCommand.Execute(null);
         }
     }
 }
