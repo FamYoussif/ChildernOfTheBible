@@ -1,17 +1,42 @@
 ﻿<UserControl x:Class="ChildernOfTheBible.Views.AttendanceView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:local="clr-namespace:ChildernOfTheBible.Views"
-             mc:Ignorable="d"
-             Height="450" Width="800">
-    <Grid Background="White">
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-            <TextBlock Text="{Binding Title}" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
-            <Border BorderBrush="#185FA5" BorderThickness="2" CornerRadius="8" Padding="20">
-                <TextBlock Text="[ SCAN BARCODE HERE ]" FontSize="18" Foreground="#185FA5"/>
-            </Border>
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title + meeting controls -->
+        <TextBlock Grid.Row="0" Text="{Binding Title}" FontSize="22" FontWeight="Bold" Margin="0,0,0,12"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,16">
+            <Button Content="Start Meeting" Command="{Binding StartMeetingCommand}"
+              IsEnabled="{Binding MeetingActive, Converter={StaticResource InverseBoolConverter}}"
+              Padding="16,8" Margin="0,0,8,0" Background="#22C55E" Foreground="White"/>
+            <Button Content="End Meeting" Command="{Binding EndMeetingCommand}"
+              IsEnabled="{Binding MeetingActive}"
+              Padding="16,8" Background="#EF4444" Foreground="White"/>
         </StackPanel>
+
+        <!-- Scan area -->
+        <Border Grid.Row="2" BorderBrush="#185FA5" BorderThickness="2" CornerRadius="8" Padding="20" Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="Scan Barcode or Type and Press Enter" FontSize="16" Foreground="#185FA5" Margin="0,0,0,8"/>
+                <TextBox x:Name="BarcodeBox"
+                 Text="{Binding BarcodeInput, UpdateSourceTrigger=PropertyChanged}"
+                 FontSize="20" Padding="8"
+                 KeyDown="BarcodeBox_KeyDown"
+                 IsEnabled="{Binding MeetingActive}"/>
+                <TextBlock Text="{Binding StatusMessage}" FontSize="18" FontWeight="SemiBold"
+                   Foreground="{Binding StatusColor}" Margin="0,10,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Recent check-ins -->
+        <GroupBox Grid.Row="3" Header="Recent Check-ins" Margin="0,0,0,0">
+            <ListBox ItemsSource="{Binding RecentCheckins}" FontSize="14"/>
+        </GroupBox>
     </Grid>
 </UserControl>
