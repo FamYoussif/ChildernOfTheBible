@@ -11,6 +11,7 @@ namespace ChildernOfTheBible.ViewModels
     {
         private readonly AttendanceService _svc;
         private Meeting? _activeMeeting;
+        private readonly WebcamService _webcam;
 
         [ObservableProperty] private string _title = "Attendance Check-in";
         [ObservableProperty] private string _barcodeInput = "";
@@ -18,8 +19,40 @@ namespace ChildernOfTheBible.ViewModels
         [ObservableProperty] private string _statusColor = "Gray";
         [ObservableProperty] private bool _meetingActive = false;
         [ObservableProperty] private ObservableCollection<string> _recentCheckins = new();
+        [ObservableProperty] private bool _cameraActive = false;
+        [ObservableProperty] private System.Windows.Media.ImageSource? _cameraFrame;
+        [ObservableProperty] private string _cameraButtonText = "Start camera";
 
-        public AttendanceViewModel(AttendanceService svc) => _svc = svc;
+        public AttendanceViewModel(AttendanceService svc, WebcamService webcam)
+        {
+            _svc = svc;
+            _webcam = webcam;
+
+            _webcam.BarcodeDetected += OnBarcodeDetected;
+            _webcam.FrameReady += frame =>
+            {
+                // Must update UI on main thread
+                System.Windows.Application.Current.Dispatcher.Invoke(()
+                    => CameraFrame = frame);
+            };
+        }
+        [RelayCommand]
+        private void ToggleCamera()
+        {
+            if (CameraActive)
+            {
+                _webcam.Stop();
+                CameraActive = false;
+                CameraButtonText = "Start camera";
+                CameraFrame = null;
+            }
+            else
+            {
+                _webcam.Start(0); // 0 = first camera (laptop webcam)
+                CameraActive = true;
+                CameraButtonText = "Stop camera";
+            }
+        }
 
         [RelayCommand]
         private async Task StartMeetingAsync()
@@ -59,6 +92,16 @@ namespace ChildernOfTheBible.ViewModels
                 StatusColor = "#EF4444";
             }
             BarcodeInput = "";
+        }
+        private void OnBarcodeDetected(string barcodeId)
+        {
+            if (_activeMeeting == null) return;
+
+            System.Windows.Application.Current.Dispatcher.Invoke(async () =>
+            {
+                BarcodeInput = barcodeId;
+                await ProcessBarcodeAsync();
+            });
         }
     }
 }

@@ -5,7 +5,6 @@ using ChildernOfTheBible.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
-using QuestPDF;
 
 namespace ChildernOfTheBible.ViewModels
 {
@@ -24,46 +23,80 @@ namespace ChildernOfTheBible.ViewModels
 
         public ReportingViewModel(ReportService svc) => _svc = svc;
 
+        // ✅ Called automatically when the view loads (wired in code-behind)
         [RelayCommand]
-        private async Task LoadMeetingsAsync()
-            => Meetings = new ObservableCollection<Meeting>(await _svc.GetAllMeetingsAsync());
+        public async Task LoadMeetingsAsync()
+        {
+            var list = await _svc.GetAllMeetingsAsync();
+            Meetings = new ObservableCollection<Meeting>(list);
+            StatusMessage = $"{list.Count} meeting(s) available.";
+        }
 
         [RelayCommand]
         private async Task RunMeetingReportAsync()
         {
-            if (SelectedMeeting == null) return;
+            if (SelectedMeeting == null)
+            {
+                StatusMessage = "Please select a meeting from the dropdown first.";
+                return;
+            }
             _currentRows = await _svc.GetMeetingReportAsync(SelectedMeeting.MeetingId);
             ReportRows = new ObservableCollection<AttendanceRow>(_currentRows);
-            StatusMessage = $"{_currentRows.Count} attendees for {SelectedMeeting.MeetingDate:dd/MM/yyyy}.";
+            StatusMessage = $"{_currentRows.Count} attendee(s) for " +
+                            $"{SelectedMeeting.MeetingDate:dd/MM/yyyy}.";
         }
 
         [RelayCommand]
         private async Task RunRangeReportAsync()
         {
+            if (RangeFrom > RangeTo)
+            {
+                StatusMessage = "From date cannot be after To date.";
+                return;
+            }
             _currentRows = await _svc.GetRangeReportAsync(RangeFrom, RangeTo);
             ReportRows = new ObservableCollection<AttendanceRow>(_currentRows);
-            StatusMessage = $"{_currentRows.Count} records from {RangeFrom:dd/MM/yyyy} to {RangeTo:dd/MM/yyyy}.";
+            StatusMessage = $"{_currentRows.Count} record(s) from " +
+                            $"{RangeFrom:dd/MM/yyyy} to {RangeTo:dd/MM/yyyy}.";
         }
 
         [RelayCommand]
         private void ExportCsv()
         {
-            var dlg = new SaveFileDialog { Filter = "CSV|*.csv", FileName = "attendance.csv" };
+            if (_currentRows.Count == 0)
+            {
+                StatusMessage = "Run a report first before exporting.";
+                return;
+            }
+            var dlg = new SaveFileDialog
+            {
+                Filter = "CSV files|*.csv",
+                FileName = $"attendance_{DateTime.Today:yyyyMMdd}.csv"
+            };
             if (dlg.ShowDialog() == true)
             {
                 _svc.ExportToCsv(_currentRows, dlg.FileName);
-                StatusMessage = $"CSV saved to {dlg.FileName}";
+                StatusMessage = $"CSV saved: {dlg.FileName}";
             }
         }
 
         [RelayCommand]
         private void ExportPdf()
         {
-            var dlg = new SaveFileDialog { Filter = "PDF|*.pdf", FileName = "attendance.pdf" };
+            if (_currentRows.Count == 0)
+            {
+                StatusMessage = "Run a report first before exporting.";
+                return;
+            }
+            var dlg = new SaveFileDialog
+            {
+                Filter = "PDF files|*.pdf",
+                FileName = $"attendance_{DateTime.Today:yyyyMMdd}.pdf"
+            };
             if (dlg.ShowDialog() == true)
             {
                 _svc.ExportToPdf(_currentRows, dlg.FileName, Title);
-                StatusMessage = $"PDF saved to {dlg.FileName}";
+                StatusMessage = $"PDF saved: {dlg.FileName}";
             }
         }
     }

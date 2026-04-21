@@ -60,5 +60,16 @@ namespace ChildernOfTheBible.Services
             return await context.Members
                 .FirstOrDefaultAsync(m => m.BarcodeId == barcodeId && m.IsActive);
         }
+
+        public async Task ReactivateAsync(int id)
+        {
+            await using var context = await _factory.CreateDbContextAsync();
+            var member = await context.Members.FindAsync(id);
+            if (member != null)
+            {
+                member.IsActive = true;
+                await context.SaveChangesAsync();
+            }
+        }
     }
 }
