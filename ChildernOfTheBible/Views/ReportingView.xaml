@@ -11,7 +11,8 @@
 
         <!-- Header -->
         <StackPanel Grid.Row="0" Margin="0,0,0,16">
-            <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="SemiBold" Foreground="#2C2C2A"/>
+            <TextBlock Text="{Binding Title}"
+                       FontSize="18" FontWeight="SemiBold" Foreground="#2C2C2A"/>
             <TextBlock Text="Generate and export attendance reports"
                        FontSize="12" Foreground="#888780" Margin="0,3,0,0"/>
         </StackPanel>
@@ -29,29 +30,45 @@
 
                 <!-- By meeting -->
                 <StackPanel Grid.Column="0">
-                    <TextBlock Text="By meeting" FontSize="11" FontWeight="SemiBold"
+                    <TextBlock Text="By meeting"
+                               FontSize="11" FontWeight="SemiBold"
                                Foreground="#2C2C2A" Margin="0,0,0,8"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
+
+                        <!-- ComboBox with readable date format -->
                         <ComboBox Grid.Column="0" Margin="0,0,8,0"
                                   ItemsSource="{Binding Meetings}"
-                                  SelectedItem="{Binding SelectedMeeting}"
-                                  DisplayMemberPath="MeetingDate"/>
+                                  SelectedItem="{Binding SelectedMeeting}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock>
+                                        <Run Text="{Binding MeetingDate,
+                                             StringFormat=dd/MM/yyyy}"/>
+                                        <Run Text=" — #"/>
+                                        <Run Text="{Binding MeetingId}"/>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
                         <Button Grid.Column="1" Content="Run"
                                 Command="{Binding RunMeetingReportCommand}"
                                 Style="{StaticResource PrimaryButtonStyle}"/>
                     </Grid>
                 </StackPanel>
 
-                <!-- Divider -->
-                <Border Grid.Column="1" Width="0.5" Background="#E8E7E0" Margin="0,4"/>
+                <!-- Vertical divider -->
+                <Border Grid.Column="1" Width="0.5"
+                        Background="#E8E7E0" Margin="0,4"/>
 
                 <!-- By date range -->
                 <StackPanel Grid.Column="2">
-                    <TextBlock Text="By date range" FontSize="11" FontWeight="SemiBold"
+                    <TextBlock Text="By date range"
+                               FontSize="11" FontWeight="SemiBold"
                                Foreground="#2C2C2A" Margin="0,0,0,8"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -60,10 +77,16 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <DatePicker Grid.Column="0" SelectedDate="{Binding RangeFrom}" Margin="0,0,6,0"/>
-                        <TextBlock Grid.Column="1" Text="to" VerticalAlignment="Center"
-                                   FontSize="12" Foreground="#888780" Margin="0,0,6,0"/>
-                        <DatePicker Grid.Column="2" SelectedDate="{Binding RangeTo}" Margin="0,0,8,0"/>
+                        <DatePicker Grid.Column="0"
+                                    SelectedDate="{Binding RangeFrom}"
+                                    Margin="0,0,6,0"/>
+                        <TextBlock Grid.Column="1" Text="to"
+                                   VerticalAlignment="Center"
+                                   FontSize="12" Foreground="#888780"
+                                   Margin="0,0,6,0"/>
+                        <DatePicker Grid.Column="2"
+                                    SelectedDate="{Binding RangeTo}"
+                                    Margin="0,0,8,0"/>
                         <Button Grid.Column="3" Content="Run"
                                 Command="{Binding RunRangeReportCommand}"
                                 Style="{StaticResource PrimaryButtonStyle}"/>
@@ -72,33 +95,49 @@
             </Grid>
         </Border>
 
-        <!-- Export bar -->
-        <Border Grid.Row="2" Margin="0,0,0,10">
-            <StackPanel Orientation="Horizontal">
-                <Button Content="Export CSV"
-                        Command="{Binding ExportCsvCommand}"
-                        Style="{StaticResource GhostButtonStyle}"
-                        Margin="0,0,8,0"/>
-                <Button Content="Export PDF"
-                        Command="{Binding ExportPdfCommand}"
-                        Style="{StaticResource GhostButtonStyle}"
-                        Margin="0,0,16,0"/>
-                <TextBlock Text="{Binding StatusMessage}"
-                           VerticalAlignment="Center"
-                           FontSize="12" Foreground="#185FA5"/>
-            </StackPanel>
-        </Border>
+        <!-- Export bar + status -->
+        <Grid Grid.Row="2" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Content="Export CSV"
+                    Command="{Binding ExportCsvCommand}"
+                    Style="{StaticResource GhostButtonStyle}"
+                    Margin="0,0,8,0"/>
+            <Button Grid.Column="1" Content="Export PDF"
+                    Command="{Binding ExportPdfCommand}"
+                    Style="{StaticResource GhostButtonStyle}"
+                    Margin="0,0,0,0"/>
+            <TextBlock Grid.Column="2"
+                       Text="{Binding StatusMessage}"
+                       VerticalAlignment="Center"
+                       FontSize="12" Foreground="#185FA5"
+                       Margin="14,0,0,0" TextWrapping="Wrap"/>
+        </Grid>
 
-        <!-- Results -->
+        <!-- Results DataGrid -->
         <Border Grid.Row="3" CornerRadius="10" Background="White"
-                BorderBrush="#E8E7E0" BorderThickness="0.5" ClipToBounds="True">
+                BorderBrush="#E8E7E0" BorderThickness="0.5"
+                ClipToBounds="True">
             <DataGrid ItemsSource="{Binding ReportRows}"
                       AutoGenerateColumns="False" IsReadOnly="True">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Name"     Binding="{Binding FullName}"    Width="2*"/>
-                    <DataGridTextColumn Header="Barcode"  Binding="{Binding BarcodeId}"   Width="1.5*"/>
-                    <DataGridTextColumn Header="Date"     Binding="{Binding MeetingDate, StringFormat=dd/MM/yyyy}" Width="*"/>
-                    <DataGridTextColumn Header="Check-in" Binding="{Binding CheckInTime, StringFormat=HH:mm}"      Width="*"/>
+                    <DataGridTextColumn Header="Name"
+                                        Binding="{Binding FullName}"
+                                        Width="2*"/>
+                    <DataGridTextColumn Header="Barcode"
+                                        Binding="{Binding BarcodeId}"
+                                        Width="1.5*"/>
+                    <DataGridTextColumn Header="Date"
+                                        Binding="{Binding MeetingDate,
+                                                  StringFormat=dd/MM/yyyy}"
+                                        Width="*"/>
+                    <DataGridTextColumn Header="Check-in"
+                                        Binding="{Binding CheckInTime,
+                                                  StringFormat=HH:mm}"
+                                        Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

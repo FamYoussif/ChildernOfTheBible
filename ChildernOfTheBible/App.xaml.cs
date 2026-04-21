@@ -59,6 +59,7 @@ namespace ChildernOfTheBible
             services.AddTransient<BarcodeService>();
             services.AddTransient<AttendanceService>();
             services.AddTransient<ReportService>();
+            services.AddSingleton<WebcamService>();
 
             // ViewModels
             services.AddTransient<MainViewModel>();

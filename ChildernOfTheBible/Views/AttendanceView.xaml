@@ -14,13 +14,16 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
+            <!-- Title -->
             <StackPanel Grid.Row="0" Margin="0,0,0,16">
-                <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="SemiBold"
+                <TextBlock Text="{Binding Title}"
+                           FontSize="18" FontWeight="SemiBold"
                            Foreground="#2C2C2A"/>
-                <TextBlock Text="Scan a member barcode to register attendance"
+                <TextBlock Text="Scan a member barcode or use your laptop camera"
                            FontSize="12" Foreground="#888780" Margin="0,3,0,0"/>
             </StackPanel>
 
@@ -28,7 +31,8 @@
             <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,16">
                 <Button Content="Start meeting"
                         Command="{Binding StartMeetingCommand}"
-                        IsEnabled="{Binding MeetingActive, Converter={StaticResource InverseBoolConverter}}"
+                        IsEnabled="{Binding MeetingActive,
+                                    Converter={StaticResource InverseBoolConverter}}"
                         Style="{StaticResource SuccessButtonStyle}"
                         Margin="0,0,8,0"/>
                 <Button Content="End meeting"
@@ -38,19 +42,23 @@
             </StackPanel>
 
             <!-- Scan box -->
-            <Border Grid.Row="2" Margin="0,0,0,12" CornerRadius="10" Padding="20,16"
-                    BorderThickness="1.5" BorderBrush="#B5D4F4" Background="#F4F8FD">
+            <Border Grid.Row="2" Margin="0,0,0,10" CornerRadius="10"
+                    Padding="20,16" BorderThickness="1.5"
+                    BorderBrush="#B5D4F4" Background="#F4F8FD">
                 <StackPanel HorizontalAlignment="Center">
-                    <Border Width="40" Height="40" CornerRadius="8" Background="#E6F1FB"
-                            HorizontalAlignment="Center" Margin="0,0,0,10">
+                    <Border Width="40" Height="40" CornerRadius="8"
+                            Background="#E6F1FB" HorizontalAlignment="Center"
+                            Margin="0,0,0,10">
                         <TextBlock Text="▦" Foreground="#185FA5" FontSize="18"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
                     </Border>
                     <TextBlock Text="Scan barcode or type and press Enter"
                                FontSize="13" Foreground="#185FA5"
                                HorizontalAlignment="Center" Margin="0,0,0,12"/>
                     <TextBox x:Name="BarcodeBox"
-                             Text="{Binding BarcodeInput, UpdateSourceTrigger=PropertyChanged}"
+                             Text="{Binding BarcodeInput,
+                                    UpdateSourceTrigger=PropertyChanged}"
                              FontSize="16" Padding="12,10"
                              KeyDown="BarcodeBox_KeyDown"
                              IsEnabled="{Binding MeetingActive}"
@@ -58,8 +66,62 @@
                 </StackPanel>
             </Border>
 
+            <!-- Camera toggle button + preview -->
+            <Border Grid.Row="3" CornerRadius="10" Margin="0,0,0,10"
+                    BorderBrush="#E8E7E0" BorderThickness="0.5"
+                    Background="White" Padding="12">
+                <StackPanel>
+
+                    <!-- Toggle row -->
+                    <Grid Margin="0,0,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="Laptop camera"
+                                       FontSize="12" FontWeight="SemiBold"
+                                       Foreground="#2C2C2A"/>
+                            <TextBlock Text="Auto-detects barcodes from the live feed"
+                                       FontSize="11" Foreground="#888780"
+                                       Margin="0,2,0,0"/>
+                        </StackPanel>
+
+                        <Button Grid.Column="1"
+                                Content="{Binding CameraButtonText}"
+                                Command="{Binding ToggleCameraCommand}"
+                                IsEnabled="{Binding MeetingActive}"
+                                Style="{StaticResource GhostButtonStyle}"/>
+                    </Grid>
+
+                    <!-- Camera preview — visible only when camera is on -->
+                    <Border Margin="0,10,0,0" CornerRadius="8"
+                            BorderBrush="#B5D4F4" BorderThickness="1"
+                            Background="#F4F8FD" ClipToBounds="True"
+                            Visibility="{Binding CameraActive,
+                                         Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Grid>
+                            <Image Source="{Binding CameraFrame}"
+                                   Height="180" Stretch="Uniform"/>
+
+                            <!-- Scanning overlay hint -->
+                            <Border VerticalAlignment="Bottom"
+                                    Background="#CC1E3A5F"
+                                    Padding="8,4">
+                                <TextBlock Text="Point camera at member barcode"
+                                           FontSize="11" Foreground="White"
+                                           HorizontalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                </StackPanel>
+            </Border>
+
             <!-- Status -->
-            <Border Grid.Row="3" CornerRadius="8" Padding="14,10" Margin="0,0,0,0">
+            <Border Grid.Row="4" CornerRadius="8" Padding="14,10"
+                    Margin="0,0,0,0">
                 <Border.Style>
                     <Style TargetType="Border">
                         <Setter Property="Background" Value="#E1F5EE"/>
@@ -72,11 +134,13 @@
                            Foreground="{Binding StatusColor}"
                            TextWrapping="Wrap"/>
             </Border>
+
         </Grid>
 
-        <!-- Right: stats + recent -->
+        <!-- Right: stats + recent check-ins -->
         <Grid Grid.Column="1" Margin="0,20,20,20">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
@@ -87,14 +151,31 @@
                 <StackPanel>
                     <TextBlock Text="Checked in today" FontSize="11"
                                Foreground="#888780" Margin="0,0,0,4"/>
-                    <TextBlock FontSize="28" FontWeight="SemiBold" Foreground="#2C2C2A">
+                    <TextBlock FontSize="28" FontWeight="SemiBold"
+                               Foreground="#2C2C2A">
                         <Run Text="{Binding RecentCheckins.Count, Mode=OneWay}"/>
                     </TextBlock>
                 </StackPanel>
             </Border>
 
+            <!-- Camera status badge — shows when camera is running -->
+            <Border Grid.Row="1" CornerRadius="7" Margin="0,0,0,12"
+                    Background="#E1F5EE" BorderBrush="#9FE1CB"
+                    BorderThickness="0.5" Padding="10,7"
+                    Visibility="{Binding CameraActive,
+                                 Converter={StaticResource BoolToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal">
+                    <Ellipse Width="6" Height="6" Fill="#1D9E75"
+                             VerticalAlignment="Center" Margin="0,0,7,0"/>
+                    <TextBlock Text="Camera scanning active"
+                               FontSize="11" Foreground="#085041"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+
             <!-- Recent check-ins -->
-            <Border Grid.Row="1" CornerRadius="10" Background="White"
+            <Border Grid.Row="2" CornerRadius="10" Background="White"
                     BorderBrush="#E8E7E0" BorderThickness="0.5" Padding="14">
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Top" Text="Recent check-ins"
@@ -106,10 +187,12 @@
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem">
                                 <Setter Property="Padding" Value="0,6"/>
-                                <Setter Property="BorderThickness" Value="0,0,0,0.5"/>
+                                <Setter Property="BorderThickness"
+                                        Value="0,0,0,0.5"/>
                                 <Setter Property="BorderBrush" Value="#EEEDE6"/>
                                 <Setter Property="Background" Value="Transparent"/>
-                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="HorizontalContentAlignment"
+                                        Value="Stretch"/>
                             </Style>
                         </ListBox.ItemContainerStyle>
                     </ListBox>

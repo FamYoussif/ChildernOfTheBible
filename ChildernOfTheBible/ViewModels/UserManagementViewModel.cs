@@ -1,5 +1,6 @@
 ﻿// ViewModels/UserManagementViewModel.cs
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 using ChildernOfTheBible.Models;
 using ChildernOfTheBible.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -13,6 +14,13 @@ namespace ChildernOfTheBible.ViewModels
         private readonly BarcodeService _barcode;
         private readonly EncryptionService _enc;
 
+        // Egyptian mobile: 010, 011, 012, 015 followed by 8 digits
+        private static readonly Regex EgyptPhoneRegex =
+            new(@"^01[0125]\d{8}$", RegexOptions.Compiled);
+
+        private static readonly Regex EmailRegex =
+            new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.Compiled);
+
         [ObservableProperty] private string _title = "Member Management";
         [ObservableProperty] private ObservableCollection<Member> _members = new();
         [ObservableProperty] private Member? _selectedMember;
@@ -23,37 +31,84 @@ namespace ChildernOfTheBible.ViewModels
         [ObservableProperty] private string _searchText = "";
         [ObservableProperty] private System.Windows.Media.Imaging.BitmapImage? _barcodeImage;
         [ObservableProperty] private string _statusMessage = "";
+        [ObservableProperty] private string _statusColor = "#185FA5";
 
-        public UserManagementViewModel(MemberService svc, BarcodeService barcode, EncryptionService enc)
+        // Tracks whether a member is loaded into the form for editing
+        [ObservableProperty] private bool _isEditing = false;
+
+        private List<Member> _allMembers = new();
+
+        public UserManagementViewModel(
+            MemberService svc, BarcodeService barcode, EncryptionService enc)
         {
             _svc = svc; _barcode = barcode; _enc = enc;
+        }
+
+        // Called when SearchText changes — filters the displayed list
+        partial void OnSearchTextChanged(string value) => ApplyFilter();
+
+        private void ApplyFilter()
+        {
+            var term = SearchText.Trim().ToLower();
+            if (string.IsNullOrEmpty(term))
+            {
+                Members = new ObservableCollection<Member>(_allMembers);
+                return;
+            }
+            var filtered = _allMembers.Where(m =>
+                m.FirstName.ToLower().Contains(term) ||
+                m.LastName.ToLower().Contains(term) ||
+                m.BarcodeId.ToLower().Contains(term));
+            Members = new ObservableCollection<Member>(filtered);
         }
 
         [RelayCommand]
         private async Task LoadMembersAsync()
         {
-            var list = await _svc.GetAllAsync();
-            Members = new ObservableCollection<Member>(list);
+            _allMembers = await _svc.GetAllAsync();
+            ApplyFilter();
         }
 
         [RelayCommand]
         private async Task AddMemberAsync()
         {
-            if (string.IsNullOrWhiteSpace(FirstName) || string.IsNullOrWhiteSpace(LastName))
-            { StatusMessage = "First and last name are required."; return; }
+            // Validate required fields
+            if (string.IsNullOrWhiteSpace(FirstName) ||
+                string.IsNullOrWhiteSpace(LastName))
+            {
+                SetStatus("First name and last name are required.", isError: true);
+                return;
+            }
+
+            // Validate email if provided
+            if (!string.IsNullOrWhiteSpace(Email) &&
+                !EmailRegex.IsMatch(Email.Trim()))
+            {
+                SetStatus("Email address is not valid.", isError: true);
+                return;
+            }
+
+            // Validate Egyptian phone if provided
+            if (!string.IsNullOrWhiteSpace(Phone) &&
+                !EgyptPhoneRegex.IsMatch(Phone.Trim()))
+            {
+                SetStatus("Phone must be an Egyptian number (e.g. 01012345678).", isError: true);
+                return;
+            }
 
             var m = new Member
             {
-                FirstName = FirstName,
-                LastName = LastName,
-                Email = Email,
-                PhoneNumber = Phone,
+                FirstName = FirstName.Trim(),
+                LastName = LastName.Trim(),
+                Email = Email.Trim(),
+                PhoneNumber = Phone.Trim(),
                 IsActive = true
             };
+
             await _svc.AddAsync(m);
             BarcodeImage = _barcode.GenerateBarcode(m.BarcodeId);
-            StatusMessage = $"Member {m.FirstName} added. Barcode: {m.BarcodeId}";
-            ClearForm();
+            SetStatus($"Member {m.FirstName} added. Barcode: {m.BarcodeId}", isError: false);
+            ResetFields();
             await LoadMembersAsync();
         }
 
@@ -66,18 +121,44 @@ namespace ChildernOfTheBible.ViewModels
             Email = _enc.Decrypt(m.Email);
             Phone = _enc.Decrypt(m.PhoneNumber);
             BarcodeImage = _barcode.GenerateBarcode(m.BarcodeId);
+            IsEditing = true;
+            SetStatus($"Editing: {m.FirstName} {m.LastName}", isError: false);
         }
 
         [RelayCommand]
         private async Task SaveEditAsync()
         {
-            if (SelectedMember == null) return;
-            SelectedMember.FirstName = FirstName;
-            SelectedMember.LastName = LastName;
-            SelectedMember.Email = Email;
-            SelectedMember.PhoneNumber = Phone;
+            if (SelectedMember == null)
+            {
+                SetStatus("No member selected. Click a row first.", isError: true);
+                return;
+            }
+
+            // Validate email if provided
+            if (!string.IsNullOrWhiteSpace(Email) &&
+                !EmailRegex.IsMatch(Email.Trim()))
+            {
+                SetStatus("Email address is not valid.", isError: true);
+                return;
+            }
+
+            // Validate Egyptian phone if provided
+            if (!string.IsNullOrWhiteSpace(Phone) &&
+                !EgyptPhoneRegex.IsMatch(Phone.Trim()))
+            {
+                SetStatus("Phone must be an Egyptian number (e.g. 01012345678).", isError: true);
+                return;
+            }
+
+            SelectedMember.FirstName = FirstName.Trim();
+            SelectedMember.LastName = LastName.Trim();
+            SelectedMember.Email = Email.Trim();
+            SelectedMember.PhoneNumber = Phone.Trim();
+
             await _svc.UpdateAsync(SelectedMember);
-            StatusMessage = "Member updated.";
+            SetStatus("Member updated successfully.", isError: false);
+            IsEditing = false;
+            ResetFields();
             await LoadMembersAsync();
         }
 
@@ -85,16 +166,54 @@ namespace ChildernOfTheBible.ViewModels
         private async Task DeactivateAsync()
         {
             if (SelectedMember == null) return;
+            if (SelectedMember.IsActive == false)
+            {
+                SetStatus("Member is already inactive.", isError: true);
+                return;
+            }
             await _svc.DeactivateAsync(SelectedMember.MemberId);
-            StatusMessage = $"{SelectedMember.FirstName} deactivated.";
-            ClearForm();
+            SetStatus($"{SelectedMember.FirstName} deactivated.", isError: false);
+            ResetFields();
             await LoadMembersAsync();
         }
 
-        private void ClearForm()
+        [RelayCommand]
+        private async Task ReactivateAsync()
         {
-            FirstName = LastName = Email = Phone = "";
+            if (SelectedMember == null) return;
+            if (SelectedMember.IsActive == true)
+            {
+                SetStatus("Member is already active.", isError: true);
+                return;
+            }
+            await _svc.ReactivateAsync(SelectedMember.MemberId);
+            SetStatus($"{SelectedMember.FirstName} reactivated.", isError: false);
+            ResetFields();
+            await LoadMembersAsync();
+        }
+
+        [RelayCommand]
+        public void ClearSelection()
+        {
+            ResetFields();
+            SetStatus("", isError: false);
+        }
+
+        private void ResetFields()
+        {
+            FirstName = "";
+            LastName = "";
+            Email = "";
+            Phone = "";
             SelectedMember = null;
+            BarcodeImage = null;
+            IsEditing = false;
+        }
+
+        private void SetStatus(string message, bool isError)
+        {
+            StatusMessage = message;
+            StatusColor = isError ? "#A32D2D" : "#185FA5";
         }
     }
 }

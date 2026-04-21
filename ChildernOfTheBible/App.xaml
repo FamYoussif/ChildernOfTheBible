@@ -11,7 +11,7 @@
     <Application.Resources>
 
         <helpers:InverseBoolConverter x:Key="InverseBoolConverter"/>
-
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
         <DataTemplate DataType="{x:Type vm:AttendanceViewModel}">
             <v:AttendanceView />
         </DataTemplate>
